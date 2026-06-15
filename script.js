@@ -4,6 +4,8 @@
 //  class (big container), single render() after every change.
 // ============================================================
 
+// constructor
+// parseFloat converts the amount string from the input into a number
 class Expense {
   constructor(id, description, amount, category, date) {
     this.id = id;
@@ -26,7 +28,8 @@ class ExpenseTracker {
     this.expenses.push(expense);
     this.save();
   }
-
+  // filter() keeps every expense whose ID does NOT match
+  // so the deleted one gets dropped from the array
   remove(id) {
     this.expenses = this.expenses.filter(e => e.id !== id);
     this.save();
@@ -51,7 +54,8 @@ class ExpenseTracker {
   getTotal(expenses) {
     return expenses.reduce((sum, e) => sum + e.amount, 0);
   }
-
+  // reduce() builds an object instead of a number
+  // || 0 handles first time a category appears (avoids undefined + number)
   getCategoryTotals(expenses) {
     return expenses.reduce((totals, e) => {
       totals[e.category] = (totals[e.category] || 0) + e.amount;
@@ -67,6 +71,8 @@ class ExpenseTracker {
     }));
   }
 
+  // Runs once on page load to restore saved data
+  // try/catch prevents a crash if localStorage data is corrupt or missing
   load() {
     try {
       const raw = localStorage.getItem('expenseTrackerData');
@@ -86,11 +92,11 @@ class ExpenseTracker {
 }
 
 
-
+// Create the tracker and load any saved data before anything else runs
 const tracker = new ExpenseTracker();
 tracker.load();
 
-
+// Grab all element references once at the top
 const form            = document.getElementById('expense-form');
 const descriptionInput= document.getElementById('description');
 const amountInput     = document.getElementById('amount');
@@ -113,7 +119,8 @@ const convertedEl     = document.getElementById('converted-amount');
 
 dateInput.value = new Date().toISOString().split('T')[0];
 
-
+// Render- called after every single state change
+// Always wipes and rebuilds the DOM from the expenses array
 function render() {
   const filterVal = filterSelect.value;
   const sortVal   = sortSelect.value;
@@ -261,5 +268,5 @@ convertBtn.addEventListener('click', async () => {
   }
 });
 
-
+//intial render
 render();
