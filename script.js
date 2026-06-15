@@ -92,7 +92,7 @@ tracker.load();
 
 
 const form            = document.getElementById('expense-form');
-const descriptionInput = document.getElementById('description');
+const descriptionInput= document.getElementById('description');
 const amountInput     = document.getElementById('amount');
 const categoryInput   = document.getElementById('category');
 const dateInput       = document.getElementById('date');
@@ -103,7 +103,7 @@ const sortSelect      = document.getElementById('sort-by');
 
 const totalAmountEl   = document.getElementById('total-amount');
 const expenseCountEl  = document.getElementById('expense-count');
-const categoryTotalsEl = document.getElementById('category-totals');
+const categoryTotalsEl= document.getElementById('category-totals');
 const expenseListEl   = document.getElementById('expense-list');
 
 const convertBtn      = document.getElementById('convert-btn');
@@ -178,3 +178,88 @@ function render() {
   convertedEl.textContent = '';
 }
 
+// handles form submit, validation, and adding to tracker
+form.addEventListener('submit', e => {
+  e.preventDefault();   
+
+  const description = descriptionInput.value.trim();
+  const amount      = parseFloat(amountInput.value);
+  const category    = categoryInput.value;
+  const date        = dateInput.value;
+
+  if (!description) {
+    showError('Description cannot be empty.');
+    return;
+  }
+  if (!amount || amount <= 0) {
+    showError('Amount must be greater than $0.00.');
+    return;
+  }
+  if (!date) {
+    showError('Please select a date.');
+    return;
+  }
+
+  clearError();
+
+  tracker.add(description, amount, category, date);
+
+  descriptionInput.value = '';
+  amountInput.value = '';
+  dateInput.value = new Date().toISOString().split('T')[0];
+
+  render();
+});
+
+function showError(msg) {
+  formError.textContent = msg;
+  formError.classList.remove('hidden');
+}
+
+function clearError() {
+  formError.textContent = '';
+  formError.classList.add('hidden');
+}
+
+
+
+filterSelect.addEventListener('change', render);
+sortSelect.addEventListener('change', render);
+
+// async fetch for live EUR conversion
+convertBtn.addEventListener('click', async () => {
+  // Get the current filtered total to convert
+  const filtered = tracker.getFiltered(filterSelect.value, sortSelect.value);
+  const total    = tracker.getTotal(filtered);
+
+  convertBtn.disabled = true;
+  convertBtn.textContent = 'Converting...';
+  convertedEl.classList.add('hidden');
+  convertedEl.classList.remove('error');
+
+  try {
+    const response = await fetch('https://open.er-api.com/v6/latest/USD');
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const rate  = data.rates.EUR;
+    const converted = (total * rate).toFixed(2);
+
+    convertedEl.textContent = `≈ €${converted} EUR`;
+    convertedEl.classList.remove('hidden');
+
+  } catch (err) {
+    convertedEl.textContent = 'Error: could not fetch exchange rate.';
+    convertedEl.classList.remove('hidden');
+    convertedEl.classList.add('error');
+  } finally {
+    convertBtn.disabled = false;
+    convertBtn.textContent = 'Convert to EUR';
+  }
+});
+
+
+render();
