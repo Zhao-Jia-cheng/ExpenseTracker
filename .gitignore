@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+ 
+# Windows
+Thumbs.db
+ 
+# Editor directories
+.vscode/
+.idea/
+ 
+# Node (not used here, but just in case)
+node_modules/
