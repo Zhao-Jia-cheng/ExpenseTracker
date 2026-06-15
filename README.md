@@ -22,7 +22,5 @@ A single-page personal expense tracker built with plain HTML, CSS, and JavaScrip
 - HTML5, CSS3, vanilla JavaScript (ES6+)
 - `localStorage` for persistence
 - `fetch` + `async/await` for the currency conversion API
-## Assignment
- 
 CSCI 39548 — Practical Web Development, Hunter College, Summer 2026
  
